@@ -17,7 +17,7 @@
 
 """
 The actual code for auth_token has now been moved python-keystoneclient.  It is
-imported back here to ensure backward combatibility for old paste.ini files
+imported back here to ensure backward compatibility for old paste.ini files
 that might still refer to here as opposed to keystoneclient
 """
 
