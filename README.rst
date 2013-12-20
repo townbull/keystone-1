@@ -10,17 +10,6 @@ Policy services for use specifically by projects in the OpenStack family.
 Much of the design is precipitated from the expectation that the auth backends
 for most deployments will actually be shims in front of existing user systems.
 
--------------
-How to Deploy
--------------
-Go to the working directory, then::
-
-   git clone https://github.com/townbull/keystone.git
-   cd keystone/
-   git checkout stable/havana
-
-
-
 -----------
 Development
 -----------
