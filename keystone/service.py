@@ -33,6 +33,7 @@ from keystone import policy
 from keystone import routers
 from keystone import token
 from keystone import trust
+from keystone import dtrust
 
 
 CONF = config.CONF
@@ -56,6 +57,7 @@ DRIVERS = dict(
     policy_api=policy.Manager(),
     token_api=token.Manager(),
     trust_api=trust.Manager(),
+    dtrust_api=dtrust.Manager(),
     token_provider_api=token.provider.Manager())
 
 dependency.resolve_future_dependencies()
@@ -123,7 +125,7 @@ def v3_app_factory(global_conf, **local_conf):
     conf.update(local_conf)
     mapper = routes.Mapper()
     v3routers = []
-    for module in [auth, catalog, credential, identity, policy]:
+    for module in [auth, catalog, credential, identity, policy, dtrust]:
         module.routers.append_v3_routers(mapper, v3routers)
 
     if CONF.trust.enabled:

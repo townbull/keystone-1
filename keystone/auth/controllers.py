@@ -171,6 +171,9 @@ class AuthInfo(object):
 
         if 'project' in self.auth['scope']:
             project_ref = self._lookup_project(self.auth['scope']['project'])
+            # print "================="
+            # print "auth.controllers.AuthInfo._validate..._scope_data " \
+            #     "\n    ==> project_ref: ", project_ref
             self._scope_data = (None, project_ref['id'], None)
         elif 'domain' in self.auth['scope']:
             domain_ref = self._lookup_domain(self.auth['scope']['domain'])
@@ -180,6 +183,10 @@ class AuthInfo(object):
                 raise exception.Forbidden('Trusts are disabled.')
             trust_ref = self._lookup_trust(
                 self.auth['scope']['OS-TRUST:trust'])
+            # print "================="
+            # print "auth.controllers.AuthInfo._validate..._scope_data " \
+            #     "\n    ==> trust_ref: ", trust_ref
+
             # TODO(ayoung): when trusts support domains, fill in domain data
             if 'project_id' in trust_ref:
                 project_ref = self._lookup_project(
@@ -283,6 +290,11 @@ class Auth(controller.V3Controller):
 
         try:
             auth_info = AuthInfo(context, auth=auth)
+            print "================="
+            print "auth.controllers.Auth.authenticate_for_token " \
+                "\n    ==> context: ", context, \
+                "\n    ==> auth: ", auth, \
+                "\n    ==> auth_info: ", auth_info
             auth_context = {'extras': {}, 'method_names': [], 'bind': {}}
             self.authenticate(context, auth_info, auth_context)
             if auth_context.get('access_token_id'):

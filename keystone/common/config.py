@@ -60,6 +60,10 @@ FILE_OPTIONS = {
         cfg.BoolOpt('enabled', default=True),
         cfg.StrOpt('driver',
                    default='keystone.trust.backends.sql.Trust')],
+    'dtrust': [
+        cfg.BoolOpt('enabled', default=True),
+        cfg.StrOpt('driver',
+                   default='keystone.dtrust.backends.sql.DTrust')],
     'os_inherit': [
         cfg.BoolOpt('enabled', default=False)],
     'token': [

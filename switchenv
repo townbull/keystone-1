@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: source $0 <user><project>" >&2
+    exit 1
+fi
+
+case "$1" in
+    "admin") PARM="admin.Default admin.Default"
+            ;;
+    "u1p1") PARM="u1.d1 p1.d1"
+            ;;
+    "u2p2") PARM="u2.d2 p2.d2"
+            ;;
+    "u2p1") PARM="u2.d2 p1.d1"
+            ;;
+    "u1p2") PARM="u1.d1 p2.d2"
+            ;;
+esac
+
+echo $PARM
+source ~/devstack/openrc $PARM
+echo "DONE"

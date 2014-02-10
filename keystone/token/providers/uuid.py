@@ -29,6 +29,7 @@ from keystone.openstack.common import log as logging
 from keystone.openstack.common import timeutils
 from keystone import token
 from keystone import trust
+from keystone import dtrust
 
 
 LOG = logging.getLogger(__name__)
@@ -136,8 +137,11 @@ class V2TokenDataHelper(object):
 class V3TokenDataHelper(object):
     """Token data helper."""
     def __init__(self):
+        self.dtrust_api = dtrust.Manager()
+
         if CONF.trust.enabled:
             self.trust_api = trust.Manager()
+
 
     def _get_filtered_domain(self, domain_id):
         domain_ref = self.identity_api.get_domain(domain_id)
@@ -151,6 +155,22 @@ class V3TokenDataHelper(object):
         filtered_project['domain'] = self._get_filtered_domain(
             project_ref['domain_id'])
         return filtered_project
+
+    def _get_domain_trustees(self, project_id):
+        project = self._get_filtered_project(project_id)
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
+            "\n    ==> project: ", project
+        trustor = project['domain']['id']
+        dtrusts = self.dtrust_api.list_dtrusts_for_trustor(trustor)
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
+            "\n    ==> dtrusts: ", dtrusts
+        #(btang:) each trustor should trust itself by default. 
+        trustees = [dt['trustee_domain_id'] for dt in dtrusts]
+        print "    ==> trustor and trustees: ", trustor, trustees
+        trustees.append(trustor)
+        return trustees
 
     def _populate_scope(self, token_data, domain_id, project_id):
         if 'domain' in token_data or 'project' in token_data:
@@ -179,6 +199,25 @@ class V3TokenDataHelper(object):
             return
 
         user_ref = self.identity_api.get_user(user_id)
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper._populate_user " \
+            "\n    ==> user_ref: ", user_ref
+
+        #(btang): check if the user-domain is trusted by the project domain
+        project_domain_trustees = self._get_domain_trustees(project_id)
+        print "token.providers.uuid.V3TokenDataHelper._populate_user " \
+            "\n    ==> project_domain_trustees: ", project_domain_trustees
+
+        if user_ref['domain_id'] not in project_domain_trustees:
+            print "$$$$$$$$$$$$$$$$$$$$"
+            print "token.providers.uuid.V3TokenDataHelper._populate_user " \
+                "\n    ==> user_domain: ", user_ref['domain_id'], \
+                "\n    ==> project_domain_trustees: ", project_domain_trustees
+            raise exception.Forbidden(_('Domain trust is absent: ' +
+                self._get_filtered_project(project_id)['domain']['name'] +
+                " --> " +
+                self._get_filtered_domain(user_ref['domain_id'])['name']))
+
         if CONF.trust.enabled and trust and 'OS-TRUST:trust' not in token_data:
             trustor_user_ref = (self.identity_api.get_user(
                                 trust['trustor_user_id']))
@@ -316,10 +355,19 @@ class V3TokenDataHelper(object):
         if bind:
             token_data['bind'] = bind
 
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper.get_token_data " \
+            "\n    ==> token_data: ", token_data, \
+            "\n    ==> CONF.trust.enabled:", CONF.trust.enabled
+
         self._populate_scope(token_data, domain_id, project_id)
         self._populate_user(token_data, user_id, domain_id, project_id, trust)
         self._populate_roles(token_data, user_id, domain_id, project_id, trust,
                              access_token)
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper.get_token_data " \
+            "\n    ==> token_data: ", token_data
+
         if include_catalog:
             self._populate_service_catalog(token_data, user_id, domain_id,
                                            project_id, trust)
