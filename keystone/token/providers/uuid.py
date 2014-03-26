@@ -157,6 +157,10 @@ class V3TokenDataHelper(object):
         return filtered_project
 
     def _get_domain_trustees(self, project_id):
+	#(btang:) if project_id == None then no dtrust should be checked
+        print "================="
+        print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
+            "\n    ==> project_id: ", project_id
         project = self._get_filtered_project(project_id)
         print "================="
         print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
@@ -166,10 +170,12 @@ class V3TokenDataHelper(object):
         print "================="
         print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
             "\n    ==> dtrusts: ", dtrusts
-        #(btang:) each trustor should trust itself by default. 
         trustees = [dt['trustee_domain_id'] for dt in dtrusts]
-        print "    ==> trustor and trustees: ", trustor, trustees
+        #(btang:) each trustor should trust itself by default. 
         trustees.append(trustor)
+
+	print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
+            "\n    ==> trustees: ", trustees
         return trustees
 
     def _populate_scope(self, token_data, domain_id, project_id):
@@ -203,20 +209,22 @@ class V3TokenDataHelper(object):
         print "token.providers.uuid.V3TokenDataHelper._populate_user " \
             "\n    ==> user_ref: ", user_ref
 
-        #(btang): check if the user-domain is trusted by the project domain
-        project_domain_trustees = self._get_domain_trustees(project_id)
-        print "token.providers.uuid.V3TokenDataHelper._populate_user " \
-            "\n    ==> project_domain_trustees: ", project_domain_trustees
-
-        if user_ref['domain_id'] not in project_domain_trustees:
-            print "$$$$$$$$$$$$$$$$$$$$"
+	#(btang) Horizon uses non-scoped token for inital user login
+        if project_id:
+            #(btang): check if the user-domain is trusted by the project domain
+            project_domain_trustees = self._get_domain_trustees(project_id)
             print "token.providers.uuid.V3TokenDataHelper._populate_user " \
-                "\n    ==> user_domain: ", user_ref['domain_id'], \
-                "\n    ==> project_domain_trustees: ", project_domain_trustees
-            raise exception.Forbidden(_('Domain trust is absent: ' +
-                self._get_filtered_project(project_id)['domain']['name'] +
-                " --> " +
-                self._get_filtered_domain(user_ref['domain_id'])['name']))
+	        "\n    ==> project_domain_trustees: ", project_domain_trustees
+
+            if user_ref['domain_id'] not in project_domain_trustees:
+                print "$$$$$$$$$$$$$$$$$$$$"
+                print "token.providers.uuid.V3TokenDataHelper._populate_user " \
+                    "\n    ==> user_domain: ", user_ref['domain_id'], \
+                    "\n    ==> project_domain_trustees: ", project_domain_trustees
+                raise exception.Forbidden(_('Domain trust is absent: ' +
+                    self._get_filtered_project(project_id)['domain']['name'] +
+                    " --> " +
+                    self._get_filtered_domain(user_ref['domain_id'])['name']))
 
         if CONF.trust.enabled and trust and 'OS-TRUST:trust' not in token_data:
             trustor_user_ref = (self.identity_api.get_user(
