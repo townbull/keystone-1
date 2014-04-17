@@ -43,7 +43,7 @@ class TrustRole(sql.ModelBase):
 
 class DTrust(sql.Base, dtrust.Driver):
     @sql.handle_conflicts(type='dtrust')
-    def create_trust(self, trust_id, trust, roles):
+    def create_dtrust(self, trust_id, trust, roles):
         session = self.get_session()
         with session.begin():
             ref = DTrustModel.from_dict(trust)

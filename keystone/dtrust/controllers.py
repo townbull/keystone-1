@@ -138,7 +138,7 @@ class DTrustV3(controller.V3Controller):
     def create_dtrust(self, context, dtrust=None):
         """Create a new trust.
 
-        The user creating the trust must be the trustor.
+        The user creating the dtrust must be the trustor.
 
         """
 
