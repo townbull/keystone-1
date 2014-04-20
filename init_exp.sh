@@ -47,8 +47,11 @@ do
         openstack domain create "d$DOMAIN"
         echo "d$DOMAIN created."
     fi
-    DID="$(openstack domain show "d$DOMAIN" | grep id | cut -d"|" -f3 | sed "s/\ //")"
+    DID=$(openstack domain show "d$DOMAIN" | grep id | cut -d"|" -f3 | \
+        sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     #echo $DID
+    #DCOUNTER=`expr $DCOUNTER + 1`
+    #continue
 
     NEXTDOMAIN=$(echo "($DCOUNTER+1) % $TOTALDOMAIN" | bc)
     if [ $NEXTDOMAIN -lt 10 ]
@@ -57,8 +60,19 @@ do
     fi
     #echo "$NEXTDOMAIN"
     #break
+    
+    NEXTDID=$(openstack domain show "d$NEXTDOMAIN" | grep id | cut -d"|" -f3 | \
+        sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-    # Add Domain Trust in MySQL DB
+    # Add Domain Trust (PAT--Type gamma trust) NEXTDOMAIN trusts DOMAIN in MySQL DB
+    if [ $1 == "-t" ]
+    then
+        /usr/bin/mysql -A -e "use keystone; insert into domain_trust \
+        (trustor_domain_id, trustee_domain_id, extra) value ('$NEXTDID','$DID','{}');"
+        echo "d$NEXTDOMAIN trusts d$DOMAIN is added."
+        DCOUNTER=`expr $DCOUNTER + 1`
+        continue
+    fi
 
     UPCOUNTER=0
 
@@ -116,6 +130,7 @@ done
 
 case $1 in
     "-d") echo "Successfully added $DCOUNTER domains";;
+    "-t") echo "Successfully added domain trust relations for $DCOUNTER domains";;
     "-u") echo "Successfully added users and projects in $DCOUNTER domains";;
     "-a") echo "Successfully added roles in $DCOUNTER domains";;
     "-c") echo "Successfully added cross-domain roles in $DCOUNTER domains";;
