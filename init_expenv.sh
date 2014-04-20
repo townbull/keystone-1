@@ -6,9 +6,16 @@ TOTALDOMAIN=10
 TOTALUSERINADOMAIN=10
 TOTALPROJINADOMAIN=10
 
-if [ $# -ne 1 ]
+if [ $# -lt 1 ]
 then
-    echo "USAGE: $0 -[r|d|u|a]"
+    echo "USAGE: $0 [-rduat] [-e <exec times>]"
+    echo "-r  add roles"
+    echo "-d  add domains"
+    echo "-u  add users and projects"
+    echo "-a  assign intra-domain users to roles in projects"
+    echo "-c  assign cross-domain users to roles in projects"
+    echo "-t  add domain-trusts"
+    echo "-e  execute experiment for <exec times> times"
     exit -1
 fi
 
@@ -46,6 +53,8 @@ do
     then
         openstack domain create "d$DOMAIN"
         echo "d$DOMAIN created."
+        DCOUNTER=`expr $DCOUNTER + 1`
+        continue
     fi
     DID=$(openstack domain show "d$DOMAIN" | grep id | cut -d"|" -f3 | \
         sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -79,7 +88,6 @@ do
     # inner while loop creating users and projects
     while [ $UPCOUNTER -lt $TOTALUSERINADOMAIN ]
     do
-
         
         if [ $UPCOUNTER -lt 10 ]
         then
