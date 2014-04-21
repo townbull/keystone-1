@@ -12,12 +12,12 @@ then
     echo "-r  add roles"
     echo "-d  add domains"
     echo "-u  add users and projects"
-    echo "-a  assign intra-domain users to roles in projects"
+    echo "-i  assign intra-domain users to roles in projects"
     echo "-c  assign cross-domain users to roles in projects"
     echo "-t  add domain-trusts"
-    echo "-e  execute experiment for <exec times> times"
     exit -1
 fi
+
 
 if [ $1 == "-r" ]
 then
@@ -31,6 +31,17 @@ then
     done
     echo "Successfully added $RCOUNTER roles."
     exit 0
+fi
+
+# Add domain_trust table in MySQL DB
+if [ $1 == "-t" ]
+then
+    /usr/bin/mysql -A -e "use keystone; create table domain_trust \
+        (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, \
+        trustor_domain_id varchar(64) NOT NULL, \
+        trustee_domain_id varchar(64) NOT NULL, deleted_at datetime, \
+        expires_at datetime, extra text);"
+    echo "Table domain_trust is added."
 fi
 
 DCOUNTER=0
@@ -114,16 +125,16 @@ do
             echo "ADDED: $USER $PROJ in d$DOMAIN (id=$DID)"
         fi
 
-        if [ $1 == "-a" ]
+        if [ $1 == "-i" ]
         then
-            # Assign userx to rolex in projectx
+            # Intra-domain assign userx to rolex in projectx
             openstack role add --user "$USER" --project "$PROJ" "r$UPCOUNTER"
             echo "$USER is assigned to r$UPCOUNTER in $PROJ"
         fi
 
         if [ $1 == "-c" ]
         then
-            # Assign userx to rolex in projectx of the next domain
+            # Cross-domain assign userx to rolex in projectx of the next domain
             openstack role add --user "$USER" --project "$CPROJ" "r$UPCOUNTER"
             echo "$USER is assigned to r$UPCOUNTER in $CPROJ"
         fi
@@ -140,7 +151,7 @@ case $1 in
     "-d") echo "Successfully added $DCOUNTER domains";;
     "-t") echo "Successfully added domain trust relations for $DCOUNTER domains";;
     "-u") echo "Successfully added users and projects in $DCOUNTER domains";;
-    "-a") echo "Successfully added roles in $DCOUNTER domains";;
+    "-i") echo "Successfully added intra-domain roles in $DCOUNTER domains";;
     "-c") echo "Successfully added cross-domain roles in $DCOUNTER domains";;
 esac
     
