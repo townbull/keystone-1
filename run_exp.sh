@@ -116,7 +116,7 @@ do
                     #echo $'==========================='
 
                     START=$(($(date +%s%N)/1000000))
-                    curl -si http://$1:5000/v3/auth/tokens -X POST \
+                    curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
                     $REQ_DATA 2>&1 > /dev/null 
                     END=$(($(date +%s%N)/1000000))
@@ -135,7 +135,7 @@ do
                     #echo $'==========================='
                     
                     START=$(($(date +%s%N)/1000000))
-                    curl -si http://$1:5000/v3/auth/tokens -X POST \
+                    curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
                     $CREQ_DATA 2>&1 > /dev/null
                     END=$(($(date +%s%N)/1000000))
@@ -156,5 +156,5 @@ do
     DCOUNTER=`expr $DCOUNTER + 1`
 done
 
-echo "Successfully sent token requests to $1 for $DCOUNTER domains"
+echo "Successfully sent token requests to $KSX for $DCOUNTER domains"
 exit 0
