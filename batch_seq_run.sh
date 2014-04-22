@@ -12,9 +12,7 @@ KS4="10.245.123.54"
 HOST="10.245.122.14"
 DB="osacdt2"
 
-$ksx=$1
-KSX="KSX$ksx"
-KSX=${!$KSX}
+ksx=$1
 
     ext=10
     while [ $ext -ge 1 ]
