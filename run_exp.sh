@@ -104,7 +104,7 @@ do
         declare -a RESULT
         while [ $EXECCOUNTER -lt $EXECTIME ]
         do
-
+            sleep 1
             # Run the requests as subshells in the background
             (
                 # Intra-domain request data
@@ -122,8 +122,8 @@ do
                     END=$(($(date +%s%N)/1000000))
                     TIME=$(($END-$START))
                     /usr/bin/mysql -uroot -padmin -h$DB -A -e "use osacdt;\
-                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, resp_time)\
-                    values (\"$1-I$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$DOMAIN\", \"$PROJ\",$TIME);"
+                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, start_time, end_time, resp_time)\
+                    values (\"$1-I$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$DOMAIN\", \"$PROJ\",$START, $END, $TIME);"
                 fi
 
                 # Cross-domain request data
