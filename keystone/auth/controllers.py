@@ -323,10 +323,9 @@ class Auth(controller.V3Controller):
             time = end - start
 
             # time in milliseconds is added in the token_data
+            token_data['time'] = time.microseconds / 1000
             print "keystone.auth.controllers.Auth#authenticate_for_token"
-            print "token_data:", token_data
-            print "time:", time.microseconds * 1000
-            
+            print "    ==> token_data with time:", token_data
 
             return render_token_data_response(token_id, token_data,
                                               created=True)
