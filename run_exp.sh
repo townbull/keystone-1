@@ -116,33 +116,33 @@ do
                     #echo $'==========================='
 
                     START=$(($(date +%s%N)/1000000))
-                    curl -si http://$KSX:5000/v3/auth/tokens -X POST \
+                    KSTIME=$(curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
-                    $REQ_DATA 2>&1 > /dev/null 
+                    $REQ_DATA | grep "token" | ./jq ".time")
                     END=$(($(date +%s%N)/1000000))
                     TIME=$(($END-$START))
                     /usr/bin/mysql -uroot -padmin -h$DB -A -e "use osacdt;\
-                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, start_time, end_time, resp_time)\
-                    values (\"$1-I$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$DOMAIN\", \"$PROJ\",$START, $END, $TIME);"
+                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, start_time, end_time, resp_time, kstime)\
+                    values (\"$1-I$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$DOMAIN\", \"$PROJ\",$START, $END, $TIME, $KSTIME);"
                 fi
 
                 # Cross-domain request data
                 if [ $2 == "-c" ]
                 then
-                    CREQ_DATA="{\"auth\":{\"identity\":{\"methods\":[\"password\"],\"password\":{\"user\":{\"domain\":{\"name\":\"d$DOMAIN\"},\"name\":\"$USER\",\"password\":\"admin\"}}},\"scope\":{\"project\":{\"domain\":{\"name\":\"d$NEXTDOMAIN\"},\"name\":\"$CPROJ\"}}}}"
+                    REQ_DATA="{\"auth\":{\"identity\":{\"methods\":[\"password\"],\"password\":{\"user\":{\"domain\":{\"name\":\"d$DOMAIN\"},\"name\":\"$USER\",\"password\":\"admin\"}}},\"scope\":{\"project\":{\"domain\":{\"name\":\"d$NEXTDOMAIN\"},\"name\":\"$CPROJ\"}}}}"
                     #echo $'\n==========================='
                     #echo "CREQ_DATA: $CREQ_DATA"
                     #echo $'==========================='
                     
                     START=$(($(date +%s%N)/1000000))
-                    curl -si http://$KSX:5000/v3/auth/tokens -X POST \
+                    KSTIME=$(curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
-                    $CREQ_DATA 2>&1 > /dev/null
+                    $REQ_DATA | grep "token" | ./jq ".time")
                     END=$(($(date +%s%N)/1000000))
                     TIME=$(($END-$START))
                     /usr/bin/mysql -uroot -padmin -h$DB -A -e "use osacdt;\
-                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, resp_time)\
-                    values (\"$1-C$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$NEXTDOMAIN\", \"$CPROJ\",$TIME);"
+                    insert into dt_exp_results (id, Keystone_IP, user_domain_name, user_name, project_domain_name, project_name, start_time, end_time, resp_time, kstime)\
+                    values (\"$1-C$EXECTIME-$EXECCOUNTER-$DCOUNTER$UPCOUNTER\", \"$KSX\", \"d$DOMAIN\", \"$USER\", \"d$NEXTDOMAIN\", \"$CPROJ\",$START, $END, $TIME, $KSTIME);"
                 fi
                 
             )&
