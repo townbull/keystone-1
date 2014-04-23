@@ -157,7 +157,7 @@ class V3TokenDataHelper(object):
         return filtered_project
 
     def _get_domain_trustees(self, project_id):
-	#(btang:) if project_id == None then no dtrust should be checked
+	    #(btang:) if project_id == None then no dtrust should be checked
         print "================="
         print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
             "\n    ==> project_id: ", project_id
@@ -173,8 +173,7 @@ class V3TokenDataHelper(object):
         trustees = [dt['trustee_domain_id'] for dt in dtrusts]
         #(btang:) each trustor should trust itself by default. 
         trustees.append(trustor)
-
-	print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
+        print "token.providers.uuid.V3TokenDataHelper._get_domain_trustees " \
             "\n    ==> trustees: ", trustees
         return trustees
 
@@ -209,7 +208,7 @@ class V3TokenDataHelper(object):
         print "token.providers.uuid.V3TokenDataHelper._populate_user " \
             "\n    ==> user_ref: ", user_ref
 
-	#(btang) Horizon uses non-scoped token for inital user login
+        #(btang) Horizon uses non-scoped token for inital user login
         if project_id:
             #(btang): check if the user-domain is trusted by the project domain
             project_domain_trustees = self._get_domain_trustees(project_id)

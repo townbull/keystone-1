@@ -25,6 +25,7 @@ from keystone.openstack.common import importutils
 from keystone.openstack.common import log as logging
 from keystone import token
 from keystone import trust
+from datetime import datetime
 
 
 LOG = logging.getLogger(__name__)
@@ -289,6 +290,10 @@ class Auth(controller.V3Controller):
         include_catalog = 'nocatalog' not in context['query_string']
 
         try:
+
+            # (btang:) measure time for osacdt experiments
+            start = datetime.now()
+
             auth_info = AuthInfo(context, auth=auth)
             print "================="
             print "auth.controllers.Auth.authenticate_for_token " \
@@ -313,6 +318,15 @@ class Auth(controller.V3Controller):
             (token_id, token_data) = self.token_provider_api.issue_v3_token(
                 auth_context['user_id'], method_names, expires_at, project_id,
                 domain_id, auth_context, trust, metadata_ref, include_catalog)
+
+            end = datetime.now()
+            time = end - start
+
+            # time in milliseconds is added in the token_data
+            print "keystone.auth.controllers.Auth#authenticate_for_token"
+            print "token_data:", token_data
+            print "time:", time.microseconds * 1000
+            
 
             return render_token_data_response(token_id, token_data,
                                               created=True)
