@@ -117,7 +117,7 @@ do
                     START=$(($(date +%s%N)/1000000))
                     KSTIME=$(curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
-                    $REQ_DATA | grep "token" | ./jq ".time")
+                    $REQ_DATA | grep "token" | /opt/stack/keystone/jq ".time")
                     END=$(($(date +%s%N)/1000000))
                     TIME=$(($END-$START))
                     /usr/bin/mysql -uroot -padmin -h$DB -A -e "use osacdt;\
@@ -136,7 +136,7 @@ do
                     START=$(($(date +%s%N)/1000000))
                     KSTIME=$(curl -si http://$KSX:5000/v3/auth/tokens -X POST \
                     -H "Content-Type: application/json" -H "Accept: application/json" -d \
-                    $REQ_DATA | grep "token" | ./jq ".time")
+                    $REQ_DATA | grep "token" | /opt/stack/keystone/jq ".time")
                     END=$(($(date +%s%N)/1000000))
                     TIME=$(($END-$START))
                     /usr/bin/mysql -uroot -padmin -h$DB -A -e "use osacdt;\
